@@ -1,6 +1,11 @@
 # Natural Language Processing
 
-Repository containing the code of the final project of the course _"Natural Language Processing"_ (Academic Year 2024-25) at the University of Milan.
+Repository containing the code of the final project of the course _"Natural Language Processing"_ (Academic Year 2024-25) at the University of Milan, as part of the Master's Degree in Computer Science.
+
+> [!IMPORTANT]
+> **AI Disclosure**
+> 
+> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
 
 ## Project Proposal
 > [!NOTE]

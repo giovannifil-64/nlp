@@ -41,6 +41,7 @@ class StereoSetDataset:
         else:
             urls = {
                 "dev": "https://raw.githubusercontent.com/moinnadeem/StereoSet/master/data/dev.json",
+                "test": "https://raw.githubusercontent.com/HUFS-NLP/CL_Polarizer/refs/heads/main/Benchmarking/benchmark/intrinsic/stereoset/test.json",
             }
 
             if split not in urls:

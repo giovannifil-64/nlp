@@ -1,6 +1,6 @@
 # Natural Language Processing
 
-Repository containing the code of the final project of the course _"Natural Language Processing"_ (Academic Year 2024-25) at the University of Milan, as part of the Master's Degree in Computer Science.
+Repository containing the code of the final project of the course _"Natural Language Processing"_ (Academic Year 2024-25) at the University of Milan, as part of the Master Degree in Computer Science.
 
 > [!IMPORTANT]
 > **AI Disclosure**
@@ -30,8 +30,17 @@ This project aims to identify, measure, and mitigate social biases, such as gend
 - Fu, C. L., Chen, Z. C., Lee, Y. R., & Lee, H. Y. (2022). Adapterbias: Parameter-efficient token-dependent representation shift for adapters in nlp tasks. *arXiv preprint arXiv:2205.00305*.
 - Park, K., Oh, S., Kim, D., & Kim, J. (2024, June). Contrastive Learning as a Polarizer: Mitigating Gender Bias by Fair and Biased sentences. In *Findings of the Association for Computational Linguistics: NAACL 2024* (pp. 4725-4736).
 
+## Project Description
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
 ## Repository structure
 
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
 
-# License
+## Usage
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

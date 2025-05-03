@@ -19,7 +19,7 @@ parser.add_argument(
     "-e",
     "--evaluate",
     action="store_true",
-    help="Evaluate the model. Use with --models to run comprehensive evaluation on multiple models.",
+    help="Evaluate the model. Use with --models to run the evaluation on multiple models.",
 )
 
 parser.add_argument(
@@ -85,7 +85,7 @@ parser.add_argument(
     "--models",
     nargs="+",
     default=["distilbert-base-uncased", "roberta-base"],
-    help="List of models to evaluate in comprehensive mode",
+    help="List of models to evaluate",
 )
 
 args = vars(parser.parse_args())
@@ -109,8 +109,6 @@ if args["device"] is None:
         device = "cpu"
 else:
     device = args["device"]
-
-print(f"Using device: {device}")
 
 if not os.path.exists(args["output_dir"]):
     os.makedirs(args["output_dir"])
@@ -150,8 +148,8 @@ def evaluate_model(model_name, device, split, output_dir, show_plots):
 
 
 def run_evaluation(models, device, split, output_dir, show_plots):
-    """Run comprehensive evaluation on multiple models."""
-    print(f"Running comprehensive evaluation on {len(models)} models...")
+    """Run evaluation on multiple models."""
+    print(f"Running evaluation on {len(models)} models...")
 
     evaluation_results = []
     for model_name in models:
@@ -177,7 +175,7 @@ if args["evaluate"]:
     print("Evaluating the model")
 
     if "--models" in sys.argv or "-models" in sys.argv:
-        print(f"Running comprehensive evaluation on {len(args['models'])} models...")
+        print(f"Running evaluation on {len(args['models'])} models...")
         run_evaluation(
             models=args["models"],
             device=device,

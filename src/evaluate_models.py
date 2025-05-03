@@ -107,7 +107,7 @@ def calculate_additional_metrics(results):
 
 def generate_bias_report(results, model_name, save_path="results"):
     """
-    Generate a comprehensive report of bias evaluation results.
+    Generate a report of bias evaluation results.
 
     Args:
         results (dict): Evaluation results
@@ -199,7 +199,7 @@ def generate_bias_report(results, model_name, save_path="results"):
         else:
             f.write("- The model shows an **overall anti-stereotype bias**\n")
 
-    print(f"Comprehensive report saved to {report_file}")
+    print(f"Report saved to {report_file}")
     return report_file
 
 

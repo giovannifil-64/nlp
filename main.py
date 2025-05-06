@@ -172,10 +172,7 @@ def run_evaluation(models, device, split, output_dir, show_plots):
 
 
 if args["evaluate"]:
-    print("Evaluating the model")
-
     if "--models" in sys.argv or "-models" in sys.argv:
-        print(f"Running evaluation on {len(args['models'])} models...")
         run_evaluation(
             models=args["models"],
             device=device,

@@ -45,7 +45,7 @@ class TestStereoSetDataset(unittest.TestCase):
     @responses.activate
     def test_download_test_dataset(self):
         """Test downloading the test dataset."""
-        mock_data = {"version": "1.0-test", "data": {"intersentence": []}}
+        mock_data = {"version": "1.0-test", "data": {"intrasentence": []}}
         responses.add(
             responses.GET,
             "https://raw.githubusercontent.com/HUFS-NLP/CL_Polarizer/refs/heads/main/Benchmarking/benchmark/intrinsic/stereoset/test.json",
@@ -57,7 +57,7 @@ class TestStereoSetDataset(unittest.TestCase):
         self.assertEqual(result, mock_data)
 
         # Check if file was cached
-        cache_path = os.path.join(self.temp_dir, "cl_polarizer_test.json")
+        cache_path = os.path.join(self.temp_dir, "stereoset_test.json")
         self.assertTrue(os.path.exists(cache_path))
 
         # Check cache content

@@ -24,6 +24,7 @@ def load_model(model_name="distilbert-base-uncased", device="mps"):
 
         print(f"Model loaded successfully and moved to {device}")
         return model, tokenizer
+    
     except Exception as e:
         print(f"Error loading model: {e}")
         raise e

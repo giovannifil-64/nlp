@@ -357,8 +357,8 @@ class BiasEvaluator:
 
         Returns
         -------
-        str
-            Path to saved visualization file
+        dict
+            Paths to saved visualization files
         """
         if not self.results:
             raise ValueError("No results available. Run evaluate_bias first.")
@@ -376,6 +376,7 @@ class BiasEvaluator:
         categories.append("overall")
         ss_scores.append(self.results["overall"]["ss_score"])
         
+        # 1. Bar chart for SS scores
         plt.figure(figsize=(10, 6))
         bars = plt.bar(categories, ss_scores, color='skyblue')
         
@@ -395,19 +396,102 @@ class BiasEvaluator:
         plt.ylim(0, 1.1)
         plt.grid(axis='y', linestyle='--', alpha=0.7)
         
+        # Add horizontal line at 0.5 to indicate neutral bias
+        plt.axhline(y=0.5, color='r', linestyle='--', alpha=0.7, label='Neutral (0.5)')
+        plt.legend()
+        
         if filename_prefix:
             file_name = f"{filename_prefix}_bias_visualization.png"
         else:
             timestamp = time.strftime("%H%M%S")
             file_name = f"bias_visualization_{timestamp}.png"
             
-        save_file = os.path.join(result_dir, file_name)
-        plt.savefig(save_file, dpi=300, bbox_inches='tight')
+        bar_chart_path = os.path.join(result_dir, file_name)
+        plt.savefig(bar_chart_path, dpi=300, bbox_inches='tight')
         
         if show:
             plt.show()
         else:
             plt.close()
             
-        print(f"Visualization saved to {save_file}")
-        return save_file
+        # 2. Heatmap showing stereotype and anti-stereotype scores
+        plt.figure(figsize=(12, 8))
+        
+        # Prepare data for heatmap
+        categories_without_overall = [cat for cat in self.results.keys() if cat != "overall"]
+        stereotype_scores = [self.results[cat]["stereotype_score"] for cat in categories_without_overall]
+        anti_stereotype_scores = [self.results[cat]["anti_stereotype_score"] for cat in categories_without_overall]
+        
+        # Create data array for heatmap
+        data = np.array([stereotype_scores, anti_stereotype_scores])
+        
+        # Create heatmap
+        im = plt.imshow(data, cmap='YlOrRd')
+        
+        # Add colorbar
+        cbar = plt.colorbar(im)
+        cbar.set_label('Score Magnitude')
+        
+        # Add labels
+        plt.yticks([0, 1], ['Stereotype', 'Anti-Stereotype'])
+        plt.xticks(range(len(categories_without_overall)), [cat.capitalize() for cat in categories_without_overall], rotation=45, ha='right')
+        
+        # Add value annotations on the heatmap
+        for i in range(data.shape[0]):
+            for j in range(data.shape[1]):
+                text = plt.text(j, i, f'{data[i, j]:.3f}',
+                               ha="center", va="center", color="black")
+        
+        plt.title('Stereotype vs. Anti-Stereotype Scores by Category')
+        plt.tight_layout()
+        
+        if filename_prefix:
+            heatmap_file_name = f"{filename_prefix}_bias_heatmap.png"
+        else:
+            timestamp = time.strftime("%H%M%S")
+            heatmap_file_name = f"bias_heatmap_{timestamp}.png"
+            
+        heatmap_path = os.path.join(result_dir, heatmap_file_name)
+        plt.savefig(heatmap_path, dpi=300, bbox_inches='tight')
+        
+        if show:
+            plt.show()
+        else:
+            plt.close()
+            
+        # 3. Pie chart showing distribution of bias severity across categories
+        plt.figure(figsize=(10, 10))
+        
+        # Calculate bias severity for each category (except overall)
+        categories_without_overall = [cat for cat in self.results.keys() if cat != "overall"]
+        bias_severities = [abs(self.results[cat]["ss_score"] - 0.5) for cat in categories_without_overall]
+        
+        # Create pie chart
+        plt.pie(bias_severities, labels=[cat.capitalize() for cat in categories_without_overall], 
+                autopct='%1.1f%%', startangle=90, shadow=True)
+        plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
+        
+        plt.title('Distribution of Bias Severity Across Categories')
+        plt.tight_layout()
+        
+        if filename_prefix:
+            pie_file_name = f"{filename_prefix}_bias_distribution.png"
+        else:
+            timestamp = time.strftime("%H%M%S")
+            pie_file_name = f"bias_distribution_{timestamp}.png"
+            
+        pie_chart_path = os.path.join(result_dir, pie_file_name)
+        plt.savefig(pie_chart_path, dpi=300, bbox_inches='tight')
+        
+        if show:
+            plt.show()
+        else:
+            plt.close()
+            
+        print(f"Visualizations saved to {result_dir}")
+        
+        return {
+            "bar_chart": bar_chart_path,
+            "heatmap": heatmap_path,
+            "pie_chart": pie_chart_path
+        }

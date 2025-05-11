@@ -4,6 +4,8 @@ import os
 import sys
 import time
 import torch
+import matplotlib.pyplot as plt
+import numpy as np
 
 from src.dataset import StereoSetDataset
 from src.evaluate_models import evaluate_model_bias, compare_models
@@ -338,6 +340,15 @@ def compare_original_and_fine_tuned(model_name, device, split, output_dir, model
     with open(comparison_file, "w") as f:
         json.dump(comparison, f, indent=2)
     
+    # Generate comparison visualizations
+    generate_comparison_visualizations(
+        original_results=original_results,
+        fine_tuned_results=fine_tuned_results,
+        model_name=model_name,
+        output_dir=comparison_dir,
+        show_plots=show_plots
+    )
+    
     print("\n===== Comparison Results =====")
     print(f"Original model - Overall SS Score: {original_results['overall']['ss_score']:.4f}")
     print(f"Fine-tuned model - Overall SS Score: {fine_tuned_results['overall']['ss_score']:.4f}")
@@ -359,6 +370,127 @@ def compare_original_and_fine_tuned(model_name, device, split, output_dir, model
     print(f"\nComparison data saved to: {comparison_file}")
     
     return comparison
+
+
+def generate_comparison_visualizations(original_results, fine_tuned_results, model_name, output_dir, show_plots=False):
+    """
+    Generate visualizations comparing original and fine-tuned model results.
+    
+    Parameters
+    ----------
+    original_results : dict
+        Evaluation results for original model
+    fine_tuned_results : dict
+        Evaluation results for fine-tuned model
+    model_name : str
+        Name of the model
+    output_dir : str
+        Directory to save visualizations
+    show_plots : bool, optional
+        Whether to display plots, by default False
+        
+    Returns
+    -------
+    dict
+        Paths to generated visualization files
+    """
+    
+    categories = sorted([cat for cat in original_results.keys() if cat != "overall"])
+    categories.append("overall")
+    
+    # 1. Bar chart comparing SS scores across categories
+    plt.figure(figsize=(12, 8))
+    x = np.arange(len(categories))
+    width = 0.35
+    
+    original_scores = [original_results[cat]["ss_score"] for cat in categories]
+    fine_tuned_scores = [fine_tuned_results[cat]["ss_score"] for cat in categories]
+    
+    fig, ax = plt.subplots(figsize=(12, 8))
+    rects1 = ax.bar(x - width/2, original_scores, width, label='Original', color='skyblue')
+    rects2 = ax.bar(x + width/2, fine_tuned_scores, width, label='Fine-tuned', color='lightgreen')
+    
+    ax.axhline(y=0.5, color='r', linestyle='--', alpha=0.7, label='Neutral (0.5)')
+    
+    ax.set_xlabel('Category')
+    ax.set_ylabel('SS Score')
+    ax.set_title(f'Stereotype Score Comparison: Original vs Fine-tuned {model_name}')
+    ax.set_xticks(x)
+    ax.set_xticklabels([cat.capitalize() for cat in categories])
+    ax.legend()
+    
+    def add_labels(rects):
+        for rect in rects:
+            height = rect.get_height()
+            ax.annotate(f'{height:.3f}',
+                        xy=(rect.get_x() + rect.get_width() / 2, height),
+                        xytext=(0, 3),
+                        textcoords="offset points",
+                        ha='center', va='bottom')
+    
+    add_labels(rects1)
+    add_labels(rects2)
+    
+    fig.tight_layout()
+    ss_chart_path = os.path.join(output_dir, 'ss_score_comparison.png')
+    plt.savefig(ss_chart_path, dpi=300)
+    
+    if show_plots:
+        plt.show()
+    else:
+        plt.close()
+    
+    # 2. Radar chart comparing improvement across categories (excluding 'overall')
+    categories_without_overall = sorted([cat for cat in original_results.keys() if cat != "overall"])
+    
+    improvements = [(fine_tuned_results[cat]["ss_score"] - original_results[cat]["ss_score"]) 
+                   for cat in categories_without_overall]
+    
+    N = len(categories_without_overall)
+    
+    angles = [n / float(N) * 2 * np.pi for n in range(N)]
+    angles += angles[:1]  # Close the loop
+    
+    improvements += improvements[:1]
+    
+    fig = plt.figure(figsize=(10, 10))
+    ax = fig.add_subplot(111, polar=True)
+    ax.plot(angles, improvements, 'o-', linewidth=2)
+    ax.fill(angles, improvements, alpha=0.25)
+    
+    plt.xticks(angles[:-1], [cat.capitalize() for cat in categories_without_overall], size=12)
+    
+    for i, improvement in enumerate(improvements[:-1]):
+        ax.annotate(f'{improvement:.3f}',
+                    xy=(angles[i], improvement),
+                    xytext=(angles[i], improvement + 0.02),
+                    ha='center',
+                    va='center')
+    
+    plt.title(f'Improvement by Category for {model_name}', size=15, y=1.1)
+    
+    maxval = max(abs(min(improvements)), abs(max(improvements)))
+    step = np.ceil(maxval * 10) / 10 / 4
+    levels = np.arange(-4*step, 4*step + step, step)
+    
+    plt.yticks(levels, [f'{level:.2f}' for level in levels], color='grey', size=10)
+    plt.ylim(-maxval*1.1, maxval*1.1)
+    plt.grid(True, linestyle='--', alpha=0.7)
+    
+    radar_chart_path = os.path.join(output_dir, 'improvement_radar_chart.png')
+    plt.savefig(radar_chart_path, dpi=300)
+    
+    if show_plots:
+        plt.show()
+    else:
+        plt.close()
+        
+    print(f"Visualizations saved to {output_dir}")
+    
+    return {
+        "ss_chart": ss_chart_path,
+        "radar_chart": radar_chart_path
+    }
 
 
 if args["evaluate"]:

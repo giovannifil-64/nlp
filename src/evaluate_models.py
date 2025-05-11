@@ -206,7 +206,7 @@ def compare_models(evaluation_results, output_dir="results", show_plots=False):
         show_plots (bool): Whether to display plots
 
     Returns:
-        str: Path to comparison report file
+        dict: Dictionary with paths to comparison report file and visualizations
     """
     comparison_dir = os.path.join(output_dir, f"model_comparison_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
     os.makedirs(comparison_dir, exist_ok=True)
@@ -275,11 +275,14 @@ def compare_models(evaluation_results, output_dir="results", show_plots=False):
                 f.write(f"- For **{category}** bias, {model_names[cat_least_biased_idx]} performs best ")
                 f.write(f"(Severity: {model_results[cat_least_biased_idx][category]['bias_severity']:.4f})\n")
 
-    generate_comparison_plots(model_names, model_results, comparison_dir, show_plots)
+    visualization_paths = generate_comparison_plots(model_names, model_results, comparison_dir, show_plots)
 
     print(f"\nModel comparison report saved to {report_file}")
     
-    return report_file
+    return {
+        "report_file": report_file,
+        "visualizations": visualization_paths
+    }
 
 
 def generate_comparison_plots(model_names, model_results, output_dir, show_plots=False):
@@ -291,10 +294,14 @@ def generate_comparison_plots(model_names, model_results, output_dir, show_plots
         model_results (list): List of model results dictionaries
         output_dir (str): Directory to save visualizations
         show_plots (bool): Whether to display plots
+        
+    Returns:
+        dict: Dictionary with paths to visualization files
     """
     categories = sorted([cat for cat in model_results[0].keys() if cat != "overall"])
     categories.append("overall")
 
+    # 1. SS Score comparison bar chart
     fig, ax = plt.figure(figsize=(12, 8)), plt.gca()
 
     x = np.arange(len(categories))
@@ -324,6 +331,7 @@ def generate_comparison_plots(model_names, model_results, output_dir, show_plots
     else:
         plt.close()
 
+    # 2. Bias severity comparison bar chart
     fig, ax = plt.figure(figsize=(12, 8)), plt.gca()
 
     for i, model_name in enumerate(model_names):
@@ -346,6 +354,103 @@ def generate_comparison_plots(model_names, model_results, output_dir, show_plots
         plt.show()
     else:
         plt.close()
+        
+    # 3. Heatmap of SS scores across models and categories
+    categories_without_overall = sorted([cat for cat in model_results[0].keys() if cat != "overall"])
+    
+    # Create data array for heatmap
+    data = np.zeros((len(model_names), len(categories_without_overall)))
+    for i, model in enumerate(model_results):
+        for j, category in enumerate(categories_without_overall):
+            data[i, j] = model[category]["ss_score"]
+    
+    fig, ax = plt.figure(figsize=(12, 8)), plt.gca()
+    
+    # Create heatmap
+    im = ax.imshow(data, cmap='YlOrRd')
+    
+    # Add colorbar
+    cbar = plt.colorbar(im)
+    cbar.set_label('SS Score')
+    
+    # Add labels
+    ax.set_yticks(range(len(model_names)))
+    ax.set_yticklabels(model_names)
+    ax.set_xticks(range(len(categories_without_overall)))
+    ax.set_xticklabels([cat.capitalize() for cat in categories_without_overall], rotation=45, ha="right")
+    
+    # Add value annotations on the heatmap
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+            text = ax.text(j, i, f'{data[i, j]:.3f}',
+                          ha="center", va="center", color="black")
+    
+    ax.set_title('Stereotype Scores Across Models and Categories')
+    plt.tight_layout()
+    
+    heatmap_path = os.path.join(output_dir, "ss_score_heatmap.png")
+    plt.savefig(heatmap_path)
+    
+    if show_plots:
+        plt.show()
+    else:
+        plt.close()
+    
+    # 4. Radar chart comparing models across categories
+    categories_without_overall = sorted([cat for cat in model_results[0].keys() if cat != "overall"])
+    
+    # Number of variables
+    N = len(categories_without_overall)
+    
+    # What will be the angle of each axis in the plot
+    angles = [n / float(N) * 2 * np.pi for n in range(N)]
+    angles += angles[:1]  # Close the loop
+    
+    fig = plt.figure(figsize=(10, 10))
+    ax = fig.add_subplot(111, polar=True)
+    
+    # Draw one axis per variable and add labels
+    plt.xticks(angles[:-1], [cat.capitalize() for cat in categories_without_overall], size=12)
+    
+    # Draw ylabels
+    ax.set_rlabel_position(0)
+    plt.yticks([0.3, 0.4, 0.5, 0.6, 0.7], ["0.3", "0.4", "0.5", "0.6", "0.7"], color="grey", size=10)
+    plt.ylim(0.3, 0.7)
+    
+    # Plot data
+    for i, model_name in enumerate(model_names):
+        model_scores = [model_results[i][cat]["ss_score"] for cat in categories_without_overall]
+        model_scores += model_scores[:1]  # Close the loop
+        
+        # Plot data and solid line connecting them
+        ax.plot(angles, model_scores, linewidth=2, linestyle='solid', label=model_name)
+        ax.fill(angles, model_scores, alpha=0.1)
+    
+    # Add neutral line (0.5)
+    neutral = [0.5 for _ in range(N)]
+    neutral += neutral[:1]
+    ax.plot(angles, neutral, linewidth=1, linestyle='--', color='r', alpha=0.7, label='Neutral (0.5)')
+    
+    # Add legend
+    plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
+    plt.title('Stereotype Score Comparison (Radar Chart)', size=15, y=1.1)
+    
+    radar_path = os.path.join(output_dir, "ss_score_radar.png")
+    plt.savefig(radar_path)
+    
+    if show_plots:
+        plt.show()
+    else:
+        plt.close()
+
+    print(f"Visualizations saved to {output_dir}")
+
+    return {
+        "ss_score_comparison": ss_plot_path,
+        "bias_severity_comparison": severity_plot_path,
+        "ss_score_heatmap": heatmap_path,
+        "ss_score_radar": radar_path
+    }
 
 
 def main():

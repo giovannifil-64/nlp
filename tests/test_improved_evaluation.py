@@ -235,10 +235,16 @@ class TestImprovedEvaluation(unittest.TestCase):
         
         evaluator = BiasEvaluator(self.model, self.tokenizer, self.device)
         evaluator.evaluate_bias(test_dataset)
-        vis_path = evaluator.visualize_results(save_path=self.temp_dir, show=False)
+        vis_paths = evaluator.visualize_results(save_path=self.temp_dir, show=False)
         
-        self.assertTrue(os.path.exists(vis_path))
-        self.assertTrue(vis_path.endswith(".png"))
+        self.assertIsInstance(vis_paths, dict)
+        self.assertIn('bar_chart', vis_paths)
+        self.assertIn('heatmap', vis_paths)
+        self.assertIn('pie_chart', vis_paths)
+        
+        for path_key, path in vis_paths.items():
+            self.assertTrue(os.path.exists(path), f"Path for {path_key} does not exist: {path}")
+            self.assertTrue(path.endswith(".png"), f"Path for {path_key} does not end with .png: {path}")
 
 
 if __name__ == "__main__":

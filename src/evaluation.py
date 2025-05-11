@@ -268,7 +268,7 @@ class BiasEvaluator:
                 anti_stereotype_score = anti_stereotype_scores[i]
 
                 try:
-                    # Calculate SS Score: P(stereotype) / (P(stereotype) + P(anti-stereotype))
+                    # Calculate SS (Stereotype Score): P(stereotype) / (P(stereotype) + P(anti-stereotype))
                     # Handle division by zero and other numerical issues
                     if stereotype_score + anti_stereotype_score == 0:
                         ss_score = 0.5  # Neutral if both scores are zero
@@ -319,15 +319,18 @@ class BiasEvaluator:
             raise ValueError("No results to save. Run evaluate_bias() first.")
 
         try:
-            if not os.path.exists(save_path):
-                os.makedirs(save_path)
+            date_str = time.strftime("%Y-%m-%d")
+            model_name = self.model.config._name_or_path.replace("/", "_")
+            result_dir = os.path.join(save_path, f"{date_str}-{model_name}")
+            
+            if not os.path.exists(result_dir):
+                os.makedirs(result_dir)
 
             if filename is None:
-                model_name = self.model.__class__.__name__
-                timestamp = time.strftime("%Y%m%d-%H%M%S")
-                filename = f"{model_name}_bias_evaluation_{timestamp}.json"
+                timestamp = time.strftime("%H%M%S")
+                filename = f"bias_evaluation_{timestamp}.json"
 
-            file_path = os.path.join(save_path, filename)
+            file_path = os.path.join(result_dir, filename)
 
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(self.results, f, indent=2)
@@ -339,111 +342,72 @@ class BiasEvaluator:
             print(f"Error saving results: {e}")
             return None
 
-    def visualize_results(self, save_path="results", show=True):
+    def visualize_results(self, save_path="results", filename_prefix=None, show=True):
         """
-        Visualize the bias evaluation results.
+        Visualize bias evaluation results with matplotlib.
 
         Parameters
         ----------
         save_path : str, optional
-            Directory to save visualization, by default "results"
+            Directory to save visualizations, by default "results"
+        filename_prefix : str, optional
+            Prefix for the visualization filename, by default None
         show : bool, optional
-            Whether to display the visualization, by default True
+            Whether to display the plots, by default True
 
         Returns
         -------
         str
-            Path to saved visualization
-
-        Raises
-        ------
-        ValueError
-            If no results are available
+            Path to saved visualization file
         """
         if not self.results:
-            raise ValueError("No results to visualize. Run evaluate_bias() first.")
+            raise ValueError("No results available. Run evaluate_bias first.")
 
-        try:
-            if not os.path.exists(save_path):
-                os.makedirs(save_path)
+        date_str = time.strftime("%Y-%m-%d")
+        model_name = self.model.config._name_or_path.replace("/", "_")
+        result_dir = os.path.join(save_path, f"{date_str}-{model_name}")
+        
+        if not os.path.exists(result_dir):
+            os.makedirs(result_dir)
 
-            categories = [cat for cat in self.results.keys() if cat != "overall"]
-            ss_scores = [self.results[cat]["ss_score"] for cat in categories]
-            stereotype_scores = [self.results[cat]["stereotype_score"] for cat in categories]
-            anti_stereotype_scores = [self.results[cat]["anti_stereotype_score"] for cat in categories]
-
-            categories.append("overall")
-            ss_scores.append(self.results["overall"]["ss_score"])
-            stereotype_scores.append(self.results["overall"]["stereotype_score"])
-            anti_stereotype_scores.append(self.results["overall"]["anti_stereotype_score"])
-
-            fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 6))
-
-            bars = ax1.bar(categories, ss_scores, color="skyblue")
-            ax1.set_title("Stereotype Score (SS)")
-            ax1.set_xlabel("Bias Category")
-            ax1.set_ylabel("SS Score")
-            ax1.axhline(y=0.5, color="r", linestyle="--", label="Neutral (0.5)")
-            ax1.legend()
-            ax1.grid(axis="y", linestyle="--", alpha=0.7)
-
-            for i, bar in enumerate(bars):
-                count = self.results[categories[i]]["count"]
-                ax1.text(
-                    bar.get_x() + bar.get_width() / 2,
-                    bar.get_height() + 0.02,
-                    f"n={count}",
-                    ha="center",
-                    va="bottom",
-                    fontsize=8,
-                )
-
-            x = np.arange(len(categories))
-            width = 0.35
-            ax2.bar(x - width / 2, stereotype_scores, width, label="Stereotype")
-            ax2.bar(x + width / 2, anti_stereotype_scores, width, label="Anti-Stereotype")
-            ax2.set_title("Raw Scores")
-            ax2.set_xlabel("Bias Category")
-            ax2.set_ylabel("Score")
-            ax2.set_xticks(x)
-            ax2.set_xticklabels(categories)
-            ax2.legend()
-            ax2.grid(axis="y", linestyle="--", alpha=0.7)
-
-            bias_severity = [abs(score - 0.5) for score in ss_scores]
-            bars = ax3.bar(categories, bias_severity, color="salmon")
-            ax3.set_title("Bias Severity (|SS - 0.5|)")
-            ax3.set_xlabel("Bias Category")
-            ax3.set_ylabel("Severity")
-            ax3.grid(axis="y", linestyle="--", alpha=0.7)
-
-            for i, bar in enumerate(bars):
-                direction = "↑" if ss_scores[i] > 0.5 else "↓"
-                ax3.text(
-                    bar.get_x() + bar.get_width() / 2,
-                    bar.get_height() + 0.02,
-                    direction,
-                    ha="center",
-                    va="bottom",
-                    fontsize=12,
-                    color="green" if direction == "↓" else "red",
-                )
-
-            fig.tight_layout()
-
-            model_name = self.model.__class__.__name__
-            timestamp = time.strftime("%Y%m%d-%H%M%S")
-            file_path = os.path.join(save_path, f"{model_name}_bias_visualization_{timestamp}.png")
-            fig.savefig(file_path, dpi=300)
-
-            if show:
-                fig.show()
-            else:
-                plt.close(fig)
-
-            print(f"Visualization saved to {file_path}")
-            return file_path
- 
-        except Exception as e:
-            print(f"Error visualizing results: {e}")
-            return None
+        categories = [cat for cat in self.results.keys() if cat != "overall"]
+        ss_scores = [self.results[cat]["ss_score"] for cat in categories]
+        
+        categories.append("overall")
+        ss_scores.append(self.results["overall"]["ss_score"])
+        
+        plt.figure(figsize=(10, 6))
+        bars = plt.bar(categories, ss_scores, color='skyblue')
+        
+        for bar in bars:
+            height = bar.get_height()
+            plt.text(
+                bar.get_x() + bar.get_width()/2.,
+                height + 0.01,
+                f'{height:.4f}',
+                ha='center', 
+                va='bottom'
+            )
+        
+        plt.title('Stereotype Score (SS) by Category')
+        plt.xlabel('Bias Category')
+        plt.ylabel('SS Score')
+        plt.ylim(0, 1.1)
+        plt.grid(axis='y', linestyle='--', alpha=0.7)
+        
+        if filename_prefix:
+            file_name = f"{filename_prefix}_bias_visualization.png"
+        else:
+            timestamp = time.strftime("%H%M%S")
+            file_name = f"bias_visualization_{timestamp}.png"
+            
+        save_file = os.path.join(result_dir, file_name)
+        plt.savefig(save_file, dpi=300, bbox_inches='tight')
+        
+        if show:
+            plt.show()
+        else:
+            plt.close()
+            
+        print(f"Visualization saved to {save_file}")
+        return save_file

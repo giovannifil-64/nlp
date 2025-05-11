@@ -2,6 +2,9 @@
 
 Repository containing the code of the final project of the course _"Natural Language Processing"_ (Academic Year 2024-25) at the University of Milan, as part of the Master Degree in Computer Science.
 
+_This project is intended for educational purposes only_
+
+
 > [!IMPORTANT]
 > **AI Disclosure**
 > 

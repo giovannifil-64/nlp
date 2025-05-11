@@ -512,36 +512,74 @@ if args["evaluate"]:
         )
 
 elif args["fine_tune"]:
-    fine_tune_and_save(
-        model_name=args["model"],
-        device=device,
-        split=args["split"],
-        output_dir=args["output_dir"],
-        models_dir=args["models_dir"],
-        epochs=args["epochs"],
-        batch_size=args["batch_size"],
-        learning_rate=args["learning_rate"],
-    )
+    if "--models" in sys.argv or "-ms" in sys.argv:
+        for model_name in args["models"]:
+            print(f"\nFine-tuning Model: {model_name}")
+            fine_tune_and_save(
+                model_name=model_name,
+                device=device,
+                split=args["split"],
+                output_dir=args["output_dir"],
+                models_dir=args["models_dir"],
+                epochs=args["epochs"],
+                batch_size=args["batch_size"],
+                learning_rate=args["learning_rate"],
+            )
+    else:
+        fine_tune_and_save(
+            model_name=args["model"],
+            device=device,
+            split=args["split"],
+            output_dir=args["output_dir"],
+            models_dir=args["models_dir"],
+            epochs=args["epochs"],
+            batch_size=args["batch_size"],
+            learning_rate=args["learning_rate"],
+        )
 
 elif args["evaluate_fine_tuned"]:
-    evaluate_fine_tuned_model(
-        model_name=args["model"],
-        device=device,
-        split=args["split"],
-        output_dir=args["output_dir"],
-        models_dir=args["models_dir"],
-        show_plots=args["show_plots"],
-    )
+    if "--models" in sys.argv or "-ms" in sys.argv:
+        for model_name in args["models"]:
+            print(f"\nEvaluating Fine-tuned Model: {model_name}")
+            evaluate_fine_tuned_model(
+                model_name=model_name,
+                device=device,
+                split=args["split"],
+                output_dir=args["output_dir"],
+                models_dir=args["models_dir"],
+                show_plots=args["show_plots"],
+            )
+    else:
+        evaluate_fine_tuned_model(
+            model_name=args["model"],
+            device=device,
+            split=args["split"],
+            output_dir=args["output_dir"],
+            models_dir=args["models_dir"],
+            show_plots=args["show_plots"],
+        )
 
 elif args["compare"]:
-    compare_original_and_fine_tuned(
-        model_name=args["model"],
-        device=device,
-        split=args["split"],
-        output_dir=args["output_dir"],
-        models_dir=args["models_dir"],
-        show_plots=args["show_plots"],
-    )
+    if "--models" in sys.argv or "-ms" in sys.argv:
+        for model_name in args["models"]:
+            print(f"\nComparing Original and Fine-tuned: {model_name}")
+            compare_original_and_fine_tuned(
+                model_name=model_name,
+                device=device,
+                split=args["split"],
+                output_dir=args["output_dir"],
+                models_dir=args["models_dir"],
+                show_plots=args["show_plots"],
+            )
+    else:
+        compare_original_and_fine_tuned(
+            model_name=args["model"],
+            device=device,
+            split=args["split"],
+            output_dir=args["output_dir"],
+            models_dir=args["models_dir"],
+            show_plots=args["show_plots"],
+        )
 
 if len(sys.argv) == 1:
     parser.print_help()

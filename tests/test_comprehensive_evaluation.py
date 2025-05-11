@@ -167,15 +167,21 @@ class TestComprehensiveEvaluation(unittest.TestCase):
             )
 
         # Generate comparison
-        comparison_file = compare_models(
+        comparison_result = compare_models(
             self.model_evaluation_results, output_dir=self.temp_dir, show_plots=False
         )
 
-        # Check that comparison file exists
-        self.assertTrue(os.path.exists(comparison_file))
+        # Check that result is a dictionary with expected keys
+        self.assertIsInstance(comparison_result, dict)
+        self.assertIn("report_file", comparison_result)
+        self.assertIn("visualizations", comparison_result)
+        
+        # Check that report file exists
+        report_file = comparison_result["report_file"]
+        self.assertTrue(os.path.exists(report_file))
 
-        # Check contents of comparison
-        with open(comparison_file, "r", encoding="utf-8") as f:
+        # Check contents of comparison report
+        with open(report_file, "r", encoding="utf-8") as f:
             comparison_content = f.read()
 
             # Check that it contains expected sections
@@ -186,6 +192,11 @@ class TestComprehensiveEvaluation(unittest.TestCase):
             # Check that it contains both model names
             self.assertIn("distilbert-base-uncased", comparison_content)
             self.assertIn("roberta-base", comparison_content)
+            
+        # Check that visualization files exist
+        self.assertIsInstance(comparison_result["visualizations"], dict)
+        for viz_name, viz_path in comparison_result["visualizations"].items():
+            self.assertTrue(os.path.exists(viz_path), f"Visualization file {viz_name} not found at {viz_path}")
 
 
 if __name__ == "__main__":

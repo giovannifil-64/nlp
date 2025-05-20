@@ -7,10 +7,20 @@ import torch
 
 from functools import lru_cache
 from tqdm import tqdm
+from transformers import AutoModelForCausalLM
 
 
 class BiasEvaluator:
-    """Class for evaluating social bias in language models using the StereoSet benchmark."""
+    """
+    Class for evaluating social bias in language models using the StereoSet benchmark.
+    
+    This evaluator can assess bias in both masked language models (like BERT) and 
+    causal language models (like GPT and LLaMA). It automatically detects the model type
+    and uses the appropriate evaluation method.
+    
+    The bias is measured using the Stereotype Score (SS), which quantifies a model's 
+    preference for stereotypical associations over anti-stereotypical ones.
+    """
 
     def __init__(self, model, tokenizer, device="mps", batch_size=8, random_seed=42):
         """
@@ -19,7 +29,7 @@ class BiasEvaluator:
         Parameters
         ----------
         model : obj
-            The pre-trained transformer model
+            The pre-trained transformer model (masked LM or causal LM)
         tokenizer : obj
             Tokenizer for the model
         device : str, optional
@@ -35,6 +45,9 @@ class BiasEvaluator:
         self.results = {}
         self.batch_size = batch_size
         self.random_seed = random_seed
+        
+        # Determine model type
+        self.is_causal_lm = isinstance(self.model, AutoModelForCausalLM)
 
         # Set random seed for reproducibility
         torch.manual_seed(random_seed)
@@ -46,6 +59,7 @@ class BiasEvaluator:
     def _cached_sentence_score(self, sentence):
         """
         Cached version of sentence scoring for avoiding redundant computations.
+        Handles both masked language models and causal language models.
 
         Parameters
         ----------
@@ -55,28 +69,54 @@ class BiasEvaluator:
         Returns
         -------
         float
-            Log probability score
+            Log probability score. Higher scores indicate the model finds the
+            sentence more probable/natural.
         """
-        tokens = self.tokenizer(sentence, return_tensors="pt").to(self.device)
-
-        input_ids = tokens.input_ids
-        attention_mask = tokens.attention_mask
-        labels = input_ids.clone()
-
         try:
-            with torch.no_grad():
-                outputs = self.model(
-                    input_ids=input_ids,
-                    attention_mask=attention_mask,
-                    labels=labels,
-                )
+            if self.is_causal_lm:
+                # For Causal LMs (GPT-like models), use a different approach for scoring
+                encoding = self.tokenizer(sentence, return_tensors="pt").to(self.device)
+                
+                with torch.no_grad():
+                    output = self.model(**encoding)
+                    
+                # Get the logits for token prediction
+                logits = output.logits
+                
+                # Calculate perplexity-based score (lower perplexity = higher score)
+                input_ids = encoding.input_ids
+                shift_logits = logits[..., :-1, :].contiguous()
+                shift_labels = input_ids[..., 1:].contiguous()
+                
+                loss_fct = torch.nn.CrossEntropyLoss(reduction='mean')
+                loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
+                
+                # Use negative loss as the score (higher is better)
+                score = -loss.item()
+                
+            else:
+                # For Masked LMs (BERT-like models), use original approach
+                tokens = self.tokenizer(sentence, return_tensors="pt").to(self.device)
 
-            loss = outputs.loss.item()
-            score = -loss
+                input_ids = tokens.input_ids
+                attention_mask = tokens.attention_mask
+                labels = input_ids.clone()
+
+                with torch.no_grad():
+                    outputs = self.model(
+                        input_ids=input_ids,
+                        attention_mask=attention_mask,
+                        labels=labels,
+                    )
+
+                loss = outputs.loss.item()
+                score = -loss
+                
             return score
         
         except Exception as e:
             print(f"Error evaluating sentence: {e}")
+            print(f"Sentence: {sentence}")
             return 0.0
 
     def evaluate_sentence_score(self, sentence):

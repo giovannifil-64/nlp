@@ -15,9 +15,9 @@ from src.models import load_model
 
 
 parser = argparse.ArgumentParser(
-    prog="Bias Evaluator",
+    prog="Mind the Gap",
     description="Evaluate and fine-tune LLMs to evaluate the presence and extent of social bias.",
-    epilog="Lorem ipsum dolor sit amet.",
+    epilog="Project proposal: https://github.com/afflint/nlp/blob/main/2024-25/projects/nlp-projects-2024-25.md#mind-the-gap-p2",
 )
 
 parser.add_argument(

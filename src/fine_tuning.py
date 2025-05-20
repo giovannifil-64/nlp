@@ -50,7 +50,12 @@ class BiasMitigationDataset(Dataset):
         attention_mask = encoding["attention_mask"].squeeze()
         labels = input_ids.clone()
         
-        labels[labels == self.tokenizer.pad_token_id] = -100
+        # Set padding tokens to -100 so they're ignored in the loss calculation
+        if hasattr(self.tokenizer, 'pad_token_id') and self.tokenizer.pad_token_id is not None:
+            labels[labels == self.tokenizer.pad_token_id] = -100
+        else:
+            # If there's no pad_token_id, use the attention mask to mask padding tokens
+            labels[attention_mask == 0] = -100
         
         return {
             "input_ids": input_ids,

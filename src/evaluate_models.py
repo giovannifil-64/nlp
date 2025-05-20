@@ -28,8 +28,12 @@ def evaluate_model_bias(
     """
     print(f"\n========== Evaluating {model_name} ==========")
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    model_output_dir = os.path.join(output_dir, f"{model_name.replace('/', '_')}_{timestamp}")
+    evaluations_dir = os.path.join(output_dir, "evaluations")
+    os.makedirs(evaluations_dir, exist_ok=True)
+    
+    formatted_model_name = model_name.replace('/', '_')
+    date_str = datetime.now().strftime("%Y%m%d")
+    model_output_dir = os.path.join(evaluations_dir, f"{formatted_model_name}_{date_str}")
     os.makedirs(model_output_dir, exist_ok=True)
 
     model, tokenizer = load_model(model_name, device)
@@ -208,11 +212,20 @@ def compare_models(evaluation_results, output_dir="results", show_plots=False):
     Returns:
         dict: Dictionary with paths to comparison report file and visualizations
     """
-    comparison_dir = os.path.join(output_dir, f"model_comparison_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
-    os.makedirs(comparison_dir, exist_ok=True)
-
+    comparisons_dir = os.path.join(output_dir, "comparisons")
+    os.makedirs(comparisons_dir, exist_ok=True)
+    
     model_names = [result["model_name"].replace("/", "_") for result in evaluation_results]
     model_results = [result["results"] for result in evaluation_results]
+    
+    date_str = datetime.now().strftime("%Y%m%d")
+    if len(model_names) > 2:
+        comparison_name = f"comparison_multiple_models_{date_str}"
+    else:
+        comparison_name = f"comparison_{'_vs_'.join(model_names)}_{date_str}"
+    
+    comparison_dir = os.path.join(comparisons_dir, comparison_name)
+    os.makedirs(comparison_dir, exist_ok=True)
 
     report_file = os.path.join(comparison_dir, "model_comparison.md")
 
@@ -358,7 +371,6 @@ def generate_comparison_plots(model_names, model_results, output_dir, show_plots
     # 3. Heatmap of SS scores across models and categories
     categories_without_overall = sorted([cat for cat in model_results[0].keys() if cat != "overall"])
     
-    # Create data array for heatmap
     data = np.zeros((len(model_names), len(categories_without_overall)))
     for i, model in enumerate(model_results):
         for j, category in enumerate(categories_without_overall):
@@ -366,20 +378,16 @@ def generate_comparison_plots(model_names, model_results, output_dir, show_plots
     
     fig, ax = plt.figure(figsize=(12, 8)), plt.gca()
     
-    # Create heatmap
     im = ax.imshow(data, cmap='YlOrRd')
     
-    # Add colorbar
     cbar = plt.colorbar(im)
     cbar.set_label('SS Score')
     
-    # Add labels
     ax.set_yticks(range(len(model_names)))
     ax.set_yticklabels(model_names)
     ax.set_xticks(range(len(categories_without_overall)))
     ax.set_xticklabels([cat.capitalize() for cat in categories_without_overall], rotation=45, ha="right")
     
-    # Add value annotations on the heatmap
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             text = ax.text(j, i, f'{data[i, j]:.3f}',
@@ -402,36 +410,29 @@ def generate_comparison_plots(model_names, model_results, output_dir, show_plots
     # Number of variables
     N = len(categories_without_overall)
     
-    # What will be the angle of each axis in the plot
     angles = [n / float(N) * 2 * np.pi for n in range(N)]
-    angles += angles[:1]  # Close the loop
+    angles += angles[:1]
     
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(111, polar=True)
     
-    # Draw one axis per variable and add labels
     plt.xticks(angles[:-1], [cat.capitalize() for cat in categories_without_overall], size=12)
     
-    # Draw ylabels
     ax.set_rlabel_position(0)
     plt.yticks([0.3, 0.4, 0.5, 0.6, 0.7], ["0.3", "0.4", "0.5", "0.6", "0.7"], color="grey", size=10)
     plt.ylim(0.3, 0.7)
     
-    # Plot data
     for i, model_name in enumerate(model_names):
         model_scores = [model_results[i][cat]["ss_score"] for cat in categories_without_overall]
-        model_scores += model_scores[:1]  # Close the loop
+        model_scores += model_scores[:1]
         
-        # Plot data and solid line connecting them
         ax.plot(angles, model_scores, linewidth=2, linestyle='solid', label=model_name)
         ax.fill(angles, model_scores, alpha=0.1)
     
-    # Add neutral line (0.5)
     neutral = [0.5 for _ in range(N)]
     neutral += neutral[:1]
     ax.plot(angles, neutral, linewidth=1, linestyle='--', color='r', alpha=0.7, label='Neutral (0.5)')
     
-    # Add legend
     plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
     plt.title('Stereotype Score Comparison (Radar Chart)', size=15, y=1.1)
     

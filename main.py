@@ -160,33 +160,15 @@ def evaluate_model(model_name, device, split, output_dir, show_plots):
     """Run the evaluation pipeline."""
     print(f"Evaluating model: {model_name} on device: {device}")
 
-    model, tokenizer = load_model(model_name, device)
-
-    dataset = StereoSetDataset()
-    dataset.download_dataset(split=split)
-    processed_data = dataset.preprocess()
-
-    evaluator = BiasEvaluator(model, tokenizer, device)
-    results = evaluator.evaluate_bias(processed_data)
-
-    results_file = evaluator.save_results(
-        save_path=output_dir,
-        filename=f"{model_name.replace('/', '_')}_bias_evaluation.json",
+    result = evaluate_model_bias(
+        model_name=model_name,
+        device=device,
+        split=split,
+        output_dir=output_dir,
+        show_plots=show_plots
     )
-
-    vis_file = evaluator.visualize_results(save_path=output_dir, show=show_plots)
-
-    print("\n===== Evaluation Results =====")
-    print(f"Overall SS Score: {results['overall']['ss_score']:.4f}")
-
-    for category in sorted(results.keys()):
-        if category != "overall":
-            print(f"{category.capitalize()} SS Score: {results[category]['ss_score']:.4f}")
-
-    print(f"\nResults saved to: {results_file}")
-    print(f"Visualization saved to: {vis_file}")
-
-    return results
+    
+    return result["results"]
 
 
 def run_evaluation(models, device, split, output_dir, show_plots):
@@ -260,6 +242,14 @@ def evaluate_fine_tuned_model(model_name, device, split, output_dir, models_dir,
         models_dir=models_dir
     )
     
+    fine_tuned_dir = os.path.join(output_dir, "fine_tuned_evaluations")
+    os.makedirs(fine_tuned_dir, exist_ok=True)
+    
+    formatted_model_name = model_name.replace('/', '_')
+    date_str = time.strftime("%Y%m%d")
+    fine_tuned_output_dir = os.path.join(fine_tuned_dir, f"fine_tuned_{formatted_model_name}_{date_str}")
+    os.makedirs(fine_tuned_output_dir, exist_ok=True)
+    
     dataset = StereoSetDataset()
     dataset.download_dataset(split=split)
     processed_data = dataset.preprocess()
@@ -268,13 +258,13 @@ def evaluate_fine_tuned_model(model_name, device, split, output_dir, models_dir,
     results = evaluator.evaluate_bias(processed_data)
     
     results_file = evaluator.save_results(
-        save_path=output_dir,
-        filename=f"{model_name.replace('/', '_')}_fine_tuned_bias_evaluation.json",
+        save_path=fine_tuned_output_dir,
+        filename=f"bias_evaluation.json",
     )
     
     vis_file = evaluator.visualize_results(
-        save_path=output_dir, 
-        filename_prefix=f"{model_name.replace('/', '_')}_fine_tuned",
+        save_path=fine_tuned_output_dir, 
+        filename_prefix=f"fine_tuned",
         show=show_plots
     )
     
@@ -325,12 +315,17 @@ def compare_original_and_fine_tuned(model_name, device, split, output_dir, model
         }
     }
 
-    formatted_model_name = model_name.replace("/", "_")
-    comparison_dir = os.path.join(output_dir, f"{time.strftime('%Y-%m-%d')}-{formatted_model_name}-comparison")
-
-    if not os.path.exists(comparison_dir):
-        os.makedirs(comparison_dir)
+    # Create the comparisons directory inside the results folder
+    comparisons_dir = os.path.join(output_dir, "comparisons")
+    os.makedirs(comparisons_dir, exist_ok=True)
     
+    # Create a directory for this specific comparison with date
+    formatted_model_name = model_name.replace('/', '_')
+    date_str = time.strftime("%Y%m%d")
+    comparison_dir = os.path.join(comparisons_dir, f"comparison_{formatted_model_name}_{date_str}")
+    os.makedirs(comparison_dir, exist_ok=True)
+    
+    # Save comparison results
     timestamp = time.strftime("%H%M%S")
     comparison_file = os.path.join(
         comparison_dir, 

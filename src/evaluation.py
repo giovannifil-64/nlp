@@ -46,10 +46,8 @@ class BiasEvaluator:
         self.batch_size = batch_size
         self.random_seed = random_seed
         
-        # Determine model type
         self.is_causal_lm = isinstance(self.model, AutoModelForCausalLM)
 
-        # Set random seed for reproducibility
         torch.manual_seed(random_seed)
         np.random.seed(random_seed)
         if torch.cuda.is_available():
@@ -80,10 +78,8 @@ class BiasEvaluator:
                 with torch.no_grad():
                     output = self.model(**encoding)
                     
-                # Get the logits for token prediction
                 logits = output.logits
                 
-                # Calculate perplexity-based score (lower perplexity = higher score)
                 input_ids = encoding.input_ids
                 shift_logits = logits[..., :-1, :].contiguous()
                 shift_labels = input_ids[..., 1:].contiguous()
@@ -91,7 +87,6 @@ class BiasEvaluator:
                 loss_fct = torch.nn.CrossEntropyLoss(reduction='mean')
                 loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
                 
-                # Use negative loss as the score (higher is better)
                 score = -loss.item()
                 
             else:
@@ -359,18 +354,14 @@ class BiasEvaluator:
             raise ValueError("No results to save. Run evaluate_bias() first.")
 
         try:
-            date_str = time.strftime("%Y-%m-%d")
-            model_name = self.model.config._name_or_path.replace("/", "_")
-            result_dir = os.path.join(save_path, f"{date_str}-{model_name}")
-            
-            if not os.path.exists(result_dir):
-                os.makedirs(result_dir)
+            # Ensure the directory exists
+            os.makedirs(save_path, exist_ok=True)
 
             if filename is None:
                 timestamp = time.strftime("%H%M%S")
                 filename = f"bias_evaluation_{timestamp}.json"
 
-            file_path = os.path.join(result_dir, filename)
+            file_path = os.path.join(save_path, filename)
 
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(self.results, f, indent=2)
@@ -403,12 +394,8 @@ class BiasEvaluator:
         if not self.results:
             raise ValueError("No results available. Run evaluate_bias first.")
 
-        date_str = time.strftime("%Y-%m-%d")
-        model_name = self.model.config._name_or_path.replace("/", "_")
-        result_dir = os.path.join(save_path, f"{date_str}-{model_name}")
-        
-        if not os.path.exists(result_dir):
-            os.makedirs(result_dir)
+        # Ensure the directory exists
+        os.makedirs(save_path, exist_ok=True)
 
         categories = [cat for cat in self.results.keys() if cat != "overall"]
         ss_scores = [self.results[cat]["ss_score"] for cat in categories]
@@ -446,7 +433,7 @@ class BiasEvaluator:
             timestamp = time.strftime("%H%M%S")
             file_name = f"bias_visualization_{timestamp}.png"
             
-        bar_chart_path = os.path.join(result_dir, file_name)
+        bar_chart_path = os.path.join(save_path, file_name)
         plt.savefig(bar_chart_path, dpi=300, bbox_inches='tight')
         
         if show:
@@ -457,26 +444,20 @@ class BiasEvaluator:
         # 2. Heatmap showing stereotype and anti-stereotype scores
         plt.figure(figsize=(12, 8))
         
-        # Prepare data for heatmap
         categories_without_overall = [cat for cat in self.results.keys() if cat != "overall"]
         stereotype_scores = [self.results[cat]["stereotype_score"] for cat in categories_without_overall]
         anti_stereotype_scores = [self.results[cat]["anti_stereotype_score"] for cat in categories_without_overall]
         
-        # Create data array for heatmap
         data = np.array([stereotype_scores, anti_stereotype_scores])
         
-        # Create heatmap
         im = plt.imshow(data, cmap='YlOrRd')
         
-        # Add colorbar
         cbar = plt.colorbar(im)
         cbar.set_label('Score Magnitude')
         
-        # Add labels
         plt.yticks([0, 1], ['Stereotype', 'Anti-Stereotype'])
         plt.xticks(range(len(categories_without_overall)), [cat.capitalize() for cat in categories_without_overall], rotation=45, ha='right')
         
-        # Add value annotations on the heatmap
         for i in range(data.shape[0]):
             for j in range(data.shape[1]):
                 text = plt.text(j, i, f'{data[i, j]:.3f}',
@@ -491,7 +472,7 @@ class BiasEvaluator:
             timestamp = time.strftime("%H%M%S")
             heatmap_file_name = f"bias_heatmap_{timestamp}.png"
             
-        heatmap_path = os.path.join(result_dir, heatmap_file_name)
+        heatmap_path = os.path.join(save_path, heatmap_file_name)
         plt.savefig(heatmap_path, dpi=300, bbox_inches='tight')
         
         if show:
@@ -502,14 +483,12 @@ class BiasEvaluator:
         # 3. Pie chart showing distribution of bias severity across categories
         plt.figure(figsize=(10, 10))
         
-        # Calculate bias severity for each category (except overall)
         categories_without_overall = [cat for cat in self.results.keys() if cat != "overall"]
         bias_severities = [abs(self.results[cat]["ss_score"] - 0.5) for cat in categories_without_overall]
         
-        # Create pie chart
         plt.pie(bias_severities, labels=[cat.capitalize() for cat in categories_without_overall], 
                 autopct='%1.1f%%', startangle=90, shadow=True)
-        plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
+        plt.axis('equal')
         
         plt.title('Distribution of Bias Severity Across Categories')
         plt.tight_layout()
@@ -520,7 +499,7 @@ class BiasEvaluator:
             timestamp = time.strftime("%H%M%S")
             pie_file_name = f"bias_distribution_{timestamp}.png"
             
-        pie_chart_path = os.path.join(result_dir, pie_file_name)
+        pie_chart_path = os.path.join(save_path, pie_file_name)
         plt.savefig(pie_chart_path, dpi=300, bbox_inches='tight')
         
         if show:
@@ -528,7 +507,7 @@ class BiasEvaluator:
         else:
             plt.close()
             
-        print(f"Visualizations saved to {result_dir}")
+        print(f"Visualizations saved to {save_path}")
         
         return {
             "bar_chart": bar_chart_path,

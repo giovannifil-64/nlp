@@ -6,9 +6,12 @@ from torch.optim import AdamW
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 from transformers import (
+    AutoConfig,
     AutoModelForMaskedLM,
+    AutoModelForCausalLM,
+    AutoModelForSeq2SeqLM,
     AutoTokenizer,
-    get_linear_schedule_with_warmup
+    get_linear_schedule_with_warmup,
 )
 
 
@@ -321,7 +324,21 @@ def load_fine_tuned_model(model_name, device="mps", models_dir="models"):
     
     print(f"Loading fine-tuned model from {model_path}")
     
-    model = AutoModelForMaskedLM.from_pretrained(model_path)
+    # Check the model configuration to determine the correct model class
+    config = AutoConfig.from_pretrained(model_path)
+    model_type = config.model_type
+    
+    # Load the appropriate model type based on the architecture
+    if model_type in ["llama", "gpt2", "gpt_neo", "gptj", "bloom", "opt"]:
+        print(f"Loading fine-tuned {model_type} model as a causal language model")
+        model = AutoModelForCausalLM.from_pretrained(model_path)
+    elif model_type in ["t5", "bart", "pegasus"]:
+        print(f"Loading fine-tuned {model_type} model as a sequence-to-sequence model")
+        model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
+    else:
+        print(f"Loading fine-tuned {model_type} model as a masked language model")
+        model = AutoModelForMaskedLM.from_pretrained(model_path)
+    
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     model = model.to(device)
     

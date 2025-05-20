@@ -56,40 +56,28 @@ The tool automatically detects and handles different model architectures:
 
 ```bash
 nlp-project/
-├── data/   # Bias datasets
+├── data/                    # Bias datasets
 │   ├── stereoset_dev.json
 │   └── stereoset_test.json
-├── docs/  # Documentation produced for the project (paper and presentation)
-│   ├── paper.pdf
-│   └── presentation.pdf
-├── models/  # Folder containing the fine-tuned models
+├── docs/                    # Documentation produced for the project
 │   └── ...
-├── results/  # Folder with the results of the evaluation
+├── models/                  # Folder containing the fine-tuned models
 │   └── ...
-├── tests/   # Folder with the unit tests
+├── results/                 # Folder with the results of the evaluation 
+│   └── ...
+├── src/                     # Source code
+│   ├── dataset.py           # StereoSet dataset utilities
+│   ├── evaluate_models.py   # Evaluate models for bias
+│   ├── evaluation.py        # Logic for the evaluation of the bias
+│   ├── fine_tuning.py       # Fine-tuning for bias mitigation
+│   └── models.py            # Model loading utilities
+├── tests/                   # Test suite
 │   └── ...
 ├── .gitignore
 ├── LICENSE
-├── main.py
+├── main.py                  # Main script entry point
 ├── README.md
 └── requirements.txt
-```
-
-
-```bash
-.
-├── src/                  # Source code
-│   ├── models.py         # Model loading utilities
-│   ├── dataset.py        # StereoSet dataset utilities
-│   ├── evaluation.py     # Bias evaluation logic
-│   ├── fine_tuning.py    # Fine-tuning for bias mitigation
-│   └── visualization.py  # Result visualization utilities
-├── tests/                # Test suite
-├── data/                 # Dataset files (StereoSet)
-├── results/              # Evaluation results and reports
-├── models/               # Fine-tuned model checkpoints
-├── main.py               # Main script entry point
-└── requirements.txt      # Project dependencies
 ```
 
 You can run:
@@ -122,6 +110,7 @@ pip install -r requirements.txt
 
 To run the evaluation of a model, you can use the command:
 
+```bash
 python main.py --evaluate --model distilbert-base-uncased
 ```
 

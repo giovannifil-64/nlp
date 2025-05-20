@@ -1,13 +1,12 @@
 # Natural Language Processing
 
-Repository containing the code of the final project of the course _"Natural Language Processing"_ (Academic Year 2024-25) at the University of Milan, as part of the Master Degree in Computer Science.
+Repository containing the code of the project for the _"Natural Language Processing"_ course (Academic Year 2024-25) at the University of Milan, as part of the Master Degree in Computer Science.
 
 _This project is intended for educational purposes only_
 
 
 > [!IMPORTANT]
 > **AI Disclosure**
-> 
 > Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
 
 ## Project Proposal
@@ -35,15 +34,141 @@ This project aims to identify, measure, and mitigate social biases, such as gend
 
 ## Project Description
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+This project evaluates language models for social bias using the StereoSet benchmark. It supports multiple model architectures including masked language models (BERT-like) and causal language models (GPT-like, LLaMA).
 
-## Repository structure
+## Features
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+- Evaluate pre-trained language models for social bias across gender, profession, race, and religion
+- Automatically detect model architecture and use appropriate evaluation method
+- Generate detailed reports with bias metrics and visualizations
+- Compare multiple models side-by-side
+- Supports both masked language models and causal language models
+
+## Supported Model Types
+
+The tool automatically detects and handles different model architectures:
+
+- **Masked Language Models**: BERT, RoBERTa, DistilBERT, ALBERT, etc.
+- **Causal Language Models**: GPT-2, LLaMA, OPT, BLOOM, etc.
+- **Sequence-to-Sequence Models**: T5, BART, PEGASUS, etc.
+
+## Project Structure
+
+```bash
+nlp-project/
+├── data/   # Bias datasets
+│   ├── stereoset_dev.json
+│   └── stereoset_test.json
+├── docs/  # Documentation produced for the project (paper and presentation)
+│   ├── paper.pdf
+│   └── presentation.pdf
+├── models/  # Folder containing the fine-tuned models
+│   └── ...
+├── results/  # Folder with the results of the evaluation
+│   └── ...
+├── tests/   # Folder with the unit tests
+│   └── ...
+├── .gitignore
+├── LICENSE
+├── main.py
+├── README.md
+└── requirements.txt
+```
+
+
+```bash
+.
+├── src/                  # Source code
+│   ├── models.py         # Model loading utilities
+│   ├── dataset.py        # StereoSet dataset utilities
+│   ├── evaluation.py     # Bias evaluation logic
+│   ├── fine_tuning.py    # Fine-tuning for bias mitigation
+│   └── visualization.py  # Result visualization utilities
+├── tests/                # Test suite
+├── data/                 # Dataset files (StereoSet)
+├── results/              # Evaluation results and reports
+├── models/               # Fine-tuned model checkpoints
+├── main.py               # Main script entry point
+└── requirements.txt      # Project dependencies
+```
+
+You can run:
+
+```bash
+python main.py --help
+```
+
+to see the available commands and their description.
 
 ## Usage
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+> [!IMPORTANT]
+> The project has been developed with Python 3.11.9.
+
+Is recommended to use a virtual environment to install the dependencies. I recommend using Miniconda, as you can specify the Python version to use.
+
+```bash
+conda create -n nlp-project python=3.11.9
+conda activate nlp-project
+```
+
+Install the dependencies using the `requirements.txt` file.
+
+```bash
+pip install -r requirements.txt
+```
+
+### Evaluation
+
+To run the evaluation of a model, you can use the command:
+
+python main.py --evaluate --model distilbert-base-uncased
+```
+
+It's also possible to specify multiple models in all the commands that require a model by using the `--models` flag.
+
+```bash
+python main.py --evaluate --models distilbert-base-uncased roberta-base
+```
+
+This command will evaluate the model(s) and save the results in the `results` folder.
+
+Two datasets are available are:
+- `stereoset_dev.json`: smaller dataset used for initial evaluation and fine-tuning
+- `stereoset_test.json`: larger dataset used for the evaluation after the fine-tuning
+
+### Fine-tuning
+
+To fine tune one, or multiple models, you can use:
+
+```bash
+python main.py --fine-tune --model distilbert-base-uncased
+```
+
+Additional parameters can be specified to the fine-tuning command, such as the number of epochs, the batch size, the device, etc.
+
+The fine-tuned model(s) will be saved in the `models` folder.
+
+### Evaluation after fine-tuning
+
+To evaluate the fine-tuned model(s), run:
+
+```bash
+python main.py --evaluate-fine-tuned --model distilbert-base-uncased
+```
+
+As for the evaluation command, the results will be saved in the `results` folder.
+
+### Comparing the results
+
+To compare the results of pre- and post-fine-tuning, just run:
+
+```bash
+python main.py --compare --model distilbert-base-uncased
+```
+
+The results will be saved in the `model_comparison_<date>_<time>` folder in the `results` folder.
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+[MIT License](LICENSE)

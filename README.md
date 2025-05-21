@@ -120,7 +120,7 @@ It's also possible to specify multiple models in all the commands that require a
 python main.py --evaluate --models distilbert-base-uncased roberta-base
 ```
 
-This command will evaluate the model(s) and save the results in the `results` folder.
+This command will evaluate the model(s) and save the results in the `results/evaluations` folder.
 
 Two datasets are available are:
 - `stereoset_dev.json`: smaller dataset used for initial evaluation and fine-tuning
@@ -146,7 +146,7 @@ To evaluate the fine-tuned model(s), run:
 python main.py --evaluate-fine-tuned --model distilbert-base-uncased
 ```
 
-As for the evaluation command, the results will be saved in the `results` folder.
+As for the evaluation command, the results will be saved in the `results/fine_tuned_evaluations` folder.
 
 ### Comparing the results
 
@@ -156,7 +156,7 @@ To compare the results of pre- and post-fine-tuning, just run:
 python main.py --compare --model distilbert-base-uncased
 ```
 
-The results will be saved in the `model_comparison_<date>_<time>` folder in the `results` folder.
+The results will be saved in the `results/comparisons` folder.
 
 ## License
 

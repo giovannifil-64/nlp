@@ -68,8 +68,16 @@ parser.add_argument(
     "-s",
     "--split",
     type=str,
+    default="dev",
+    help="Dataset split to use for evaluation (dev, test). Default is 'dev'.",
+)
+
+parser.add_argument(
+    "-fts",
+    "--fine-tune-split",
+    type=str,
     default="test",
-    help="Dataset split to use (dev, test)",
+    help="Dataset split to use for fine-tuning (dev, test). Default is 'test'.",
 )
 
 parser.add_argument(
@@ -513,7 +521,7 @@ elif args["fine_tune"]:
             fine_tune_and_save(
                 model_name=model_name,
                 device=device,
-                split=args["split"],
+                split=args["fine_tune_split"],
                 output_dir=args["output_dir"],
                 models_dir=args["models_dir"],
                 epochs=args["epochs"],
@@ -524,7 +532,7 @@ elif args["fine_tune"]:
         fine_tune_and_save(
             model_name=args["model"],
             device=device,
-            split=args["split"],
+            split=args["fine_tune_split"],
             output_dir=args["output_dir"],
             models_dir=args["models_dir"],
             epochs=args["epochs"],

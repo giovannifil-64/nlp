@@ -57,8 +57,8 @@ The tool automatically detects and handles different model architectures:
 ```bash
 nlp-project/
 ├── data/                    # Bias datasets
-│   ├── stereoset_dev.json
-│   └── stereoset_test.json
+│   ├── stereoset_dev.json   # Smaller dataset used for evaluation before and after fine-tuning
+│   └── stereoset_test.json  # Larger dataset used for fine-tuning
 ├── docs/                    # Documentation produced for the project
 │   └── ...
 ├── models/                  # Folder containing the fine-tuned models
@@ -122,9 +122,9 @@ python main.py --evaluate --models distilbert-base-uncased roberta-base
 
 This command will evaluate the model(s) and save the results in the `results/evaluations` folder.
 
-Two datasets are available are:
-- `stereoset_dev.json`: smaller dataset used for initial evaluation and fine-tuning
-- `stereoset_test.json`: larger dataset used for the evaluation after the fine-tuning
+Two datasets are available:
+- `stereoset_dev.json`: Smaller dataset used for evaluation before and after fine-tuning (default for evaluation)
+- `stereoset_test.json`: Larger dataset used for fine-tuning (default for training)
 
 ### Fine-tuning
 
@@ -132,6 +132,12 @@ To fine tune one, or multiple models, you can use:
 
 ```bash
 python main.py --fine-tune --model distilbert-base-uncased
+```
+
+This will use the test dataset by default. To use a different dataset for fine-tuning:
+
+```bash
+python main.py --fine-tune --model distilbert-base-uncased --fine-tune-split dev
 ```
 
 Additional parameters can be specified to the fine-tuning command, such as the number of epochs, the batch size, the device, etc.
@@ -146,7 +152,13 @@ To evaluate the fine-tuned model(s), run:
 python main.py --evaluate-fine-tuned --model distilbert-base-uncased
 ```
 
-As for the evaluation command, the results will be saved in the `results/fine_tuned_evaluations` folder.
+This will use the dev dataset by default, the same used for the initial evaluation. To use a different dataset:
+
+```bash
+python main.py --evaluate-fine-tuned --model distilbert-base-uncased --split test
+```
+
+The results will be saved in the `results/fine_tuned_evaluations` folder.
 
 ### Comparing the results
 

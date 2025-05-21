@@ -324,11 +324,9 @@ def load_fine_tuned_model(model_name, device="mps", models_dir="models"):
     
     print(f"Loading fine-tuned model from {model_path}")
     
-    # Check the model configuration to determine the correct model class
     config = AutoConfig.from_pretrained(model_path)
     model_type = config.model_type
     
-    # Load the appropriate model type based on the architecture
     if model_type in ["llama", "gpt2", "gpt_neo", "gptj", "bloom", "opt"]:
         print(f"Loading fine-tuned {model_type} model as a causal language model")
         model = AutoModelForCausalLM.from_pretrained(model_path)

@@ -5,3 +5,6 @@ __pycache__
 
 # Environment variables
 .env
+
+# Large model files will not be uploaded to GitHub
+models/*

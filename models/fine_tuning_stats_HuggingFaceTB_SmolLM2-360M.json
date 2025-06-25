@@ -1,0 +1,12 @@
+{
+    "train_loss_per_epoch": [
+        3.2795,
+        2.5763,
+        2.1055
+    ],
+    "model_name": "HuggingFaceTB/SmolLM2-360M",
+    "epochs": 3,
+    "batch_size": 16,
+    "learning_rate": 5e-05,
+    "training_examples": 6392
+} 

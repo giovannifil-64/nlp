@@ -1,0 +1,52 @@
+{
+  "overall": {
+    "ss_score": 0.4920360394702932,
+    "stereotype_score": -4.792795984426488,
+    "anti_stereotype_score": -4.940349389282574,
+    "count": 6392,
+    "bias_difference": 0.1475534048560858,
+    "bias_ratio": 0.9701330020957256,
+    "bias_severity": 0.007963960529706826,
+    "bias_direction": -1
+  },
+  "gender": {
+    "ss_score": 0.4887480626028458,
+    "stereotype_score": -4.623024899517361,
+    "anti_stereotype_score": -4.835657014611785,
+    "count": 771,
+    "bias_difference": 0.21263211509442392,
+    "bias_ratio": 0.9560282885134495,
+    "bias_severity": 0.011251937397154188,
+    "bias_direction": -1
+  },
+  "profession": {
+    "ss_score": 0.49262712066011466,
+    "stereotype_score": -5.014186032868307,
+    "anti_stereotype_score": -5.158263764150745,
+    "count": 2398,
+    "bias_difference": 0.1440777312824384,
+    "bias_ratio": 0.9720685606882379,
+    "bias_severity": 0.007372879339885341,
+    "bias_direction": -1
+  },
+  "race": {
+    "ss_score": 0.49280607471494037,
+    "stereotype_score": -4.67812713720305,
+    "anti_stereotype_score": -4.804739753845879,
+    "count": 2976,
+    "bias_difference": 0.12661261664282897,
+    "bias_ratio": 0.973648392393889,
+    "bias_severity": 0.0071939252850596325,
+    "bias_direction": -1
+  },
+  "religion": {
+    "ss_score": 0.48728297300683515,
+    "stereotype_score": -4.554960598347158,
+    "anti_stereotype_score": -4.785423984411757,
+    "count": 247,
+    "bias_difference": 0.23046338606459926,
+    "bias_ratio": 0.9518405502176358,
+    "bias_severity": 0.012717026993164848,
+    "bias_direction": -1
+  }
+}

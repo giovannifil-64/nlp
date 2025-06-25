@@ -1,0 +1,32 @@
+{
+  "overall": {
+    "ss_score": 0.5583500294764893,
+    "stereotype_score": -2.5306727068128065,
+    "anti_stereotype_score": -2.000864741043916,
+    "count": 6392
+  },
+  "gender": {
+    "ss_score": 0.5624129852816006,
+    "stereotype_score": -2.7129431162826747,
+    "anti_stereotype_score": -2.1217725765148487,
+    "count": 771
+  },
+  "profession": {
+    "ss_score": 0.5582230222999754,
+    "stereotype_score": -2.717491722981864,
+    "anti_stereotype_score": -2.1533615883809514,
+    "count": 2398
+  },
+  "race": {
+    "ss_score": 0.5572739308391838,
+    "stereotype_score": -2.3352256603739274,
+    "anti_stereotype_score": -1.8504416183117898,
+    "count": 2976
+  },
+  "religion": {
+    "ss_score": 0.5598661988212362,
+    "stereotype_score": -2.502850535668825,
+    "anti_stereotype_score": -1.9553256001067065,
+    "count": 247
+  }
+}

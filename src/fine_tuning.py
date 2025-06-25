@@ -219,9 +219,14 @@ class ModelFineTuner:
         
         self.save_model("final")
         
-        stats_path = os.path.join(self.output_dir, "fine_tuning_stats.json")
+        # Save model-specific stats file to avoid overwriting
+        model_name_safe = self.model.config._name_or_path.replace("/", "_")
+        stats_filename = f"fine_tuning_stats_{model_name_safe}.json"
+        stats_path = os.path.join(self.output_dir, stats_filename)
         with open(stats_path, "w") as f:
-            json.dump(training_stats, f, indent=2)
+            json.dump(training_stats, f, indent=4)
+            
+        print(f"Fine-tuning statistics saved to: {stats_path}")
         
         return training_stats
     

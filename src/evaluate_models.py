@@ -85,7 +85,7 @@ def calculate_additional_metrics(results):
         )
 
         # Bias ratio: ratio of stereotype to anti-stereotype scores
-        if results[category]["anti_stereotype_score"] > 0:
+        if results[category]["anti_stereotype_score"] != 0:
             results[category]["bias_ratio"] = (
                 results[category]["stereotype_score"]
                 / results[category]["anti_stereotype_score"]

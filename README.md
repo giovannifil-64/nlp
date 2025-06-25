@@ -7,7 +7,7 @@ _This project is intended for educational purposes only_
 
 > [!IMPORTANT]
 > **AI Disclosure**
-> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+> AI-generated content has been used in this project. More specifically, part of the testing scripts and improvements to the fine-tuning process were done using Claude 3.7 Sonnet. AI has been used to fix some issues in the generation of the the comparison reports (e.g. the bias heatmap).
 
 ## Project Proposal
 > [!NOTE]
@@ -59,23 +59,23 @@ nlp-project/
 ├── data/                    # Bias datasets
 │   ├── stereoset_dev.json   # Smaller dataset used for evaluation before and after fine-tuning
 │   └── stereoset_test.json  # Larger dataset used for fine-tuning
-├── docs/                    # Documentation produced for the project
+├── docs/                    # Documentation produced (paper and presentation) [WIP]
 │   └── ...
-├── models/                  # Folder containing the fine-tuned models
+├── models/                  # Folder containing the fine-tuned model(s)
 │   └── ...
 ├── results/                 # Folder with the results of the evaluation 
 │   └── ...
 ├── src/                     # Source code
 │   ├── dataset.py           # StereoSet dataset utilities
-│   ├── evaluate_models.py   # Evaluate models for bias
+│   ├── evaluate_models.py   # Evaluate model(s) for bias
 │   ├── evaluation.py        # Logic for the evaluation of the bias
 │   ├── fine_tuning.py       # Fine-tuning for bias mitigation
-│   └── models.py            # Model loading utilities
-├── tests/                   # Test suite
+│   └── models.py            # Model(s) loading utilities
+├── tests/                   # Test suite (used for the development of the project)
 │   └── ...
 ├── .gitignore
 ├── LICENSE
-├── main.py                  # Main script entry point
+├── main.py                  # Entry point
 ├── README.md
 └── requirements.txt
 ```
@@ -169,6 +169,18 @@ python main.py --compare --model distilbert-base-uncased
 ```
 
 The results will be saved in the `results/comparisons` folder.
+
+## Hardware
+
+Experiments were run on a MacBook Pro:
+- CPU: SoC Apple M4 Pro
+- GPU: Built-in GPU with 20 cores
+- RAM: 48 GB
+- OS: macOS 15.5 (Sequoia)
+- MPS (Metal Performance Shaders) was used for taking advantage of the GPU acceleration. [1] [2]
+
+[1]: https://docs.pytorch.org/docs/stable/notes/mps.html
+[2]: https://developer.apple.com/metal/pytorch/
 
 ## License
 

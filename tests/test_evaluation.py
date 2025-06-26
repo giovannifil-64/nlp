@@ -1,3 +1,23 @@
+# Copyright (c) 2025 Giovanni Filippini
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import json
 import os
 import shutil
@@ -16,7 +36,6 @@ class TestEvaluation(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up the test environment."""
-        # Determine device for testing
         if torch.cuda.is_available():
             cls.device = "cuda"
         elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
@@ -24,16 +43,12 @@ class TestEvaluation(unittest.TestCase):
         else:
             cls.device = "cpu"
 
-        # Use temporary directory for test outputs
         cls.temp_dir = tempfile.mkdtemp()
 
-        # Use a small model for faster testing
-        cls.model_name = "distilbert-base-uncased"
+        cls.model_name = "HuggingFaceTB/SmolLM2-360M"
 
-        # Load a model for testing
         cls.model, cls.tokenizer = load_model(cls.model_name, cls.device)
 
-        # Load a small subset of data
         cls.dataset = StereoSetDataset(cache_dir=cls.temp_dir)
 
     @classmethod
@@ -49,7 +64,6 @@ class TestEvaluation(unittest.TestCase):
 
     def test_dataset_loading(self):
         """Test that the dataset loads correctly."""
-        # Use dev split for faster testing
         dataset = self.dataset.download_dataset(split="dev")
         self.assertIsNotNone(dataset)
         self.assertIn("data", dataset)
@@ -57,25 +71,20 @@ class TestEvaluation(unittest.TestCase):
 
     def test_dataset_preprocessing(self):
         """Test that the dataset is preprocessed correctly."""
-        # First download dataset
         self.dataset.download_dataset(split="dev")
 
-        # Then preprocess
         processed_data = self.dataset.preprocess()
 
-        # Check that all expected categories are present
         self.assertIn("gender", processed_data)
         self.assertIn("profession", processed_data)
         self.assertIn("race", processed_data)
         self.assertIn("religion", processed_data)
 
-        # Check that we have data in at least some categories
         total_examples = sum(len(examples) for examples in processed_data.values())
         self.assertGreater(total_examples, 0)
 
     def test_bias_evaluation(self):
         """Test that the bias evaluation works correctly."""
-        # Create a minimal dataset for testing
         mini_dataset = {
             "gender": [
                 {
@@ -97,26 +106,21 @@ class TestEvaluation(unittest.TestCase):
             ]
         }
 
-        # Initialize evaluator
         evaluator = BiasEvaluator(self.model, self.tokenizer, self.device)
 
-        # Evaluate bias
         results = evaluator.evaluate_bias(mini_dataset)
 
-        # Check that results have the expected structure
         self.assertIn("gender", results)
         self.assertIn("overall", results)
         self.assertIn("ss_score", results["gender"])
         self.assertIn("stereotype_score", results["gender"])
         self.assertIn("anti_stereotype_score", results["gender"])
 
-        # Check that the ss_score is between 0 and 1
         self.assertGreaterEqual(results["gender"]["ss_score"], 0)
         self.assertLessEqual(results["gender"]["ss_score"], 1)
 
     def test_results_saving(self):
         """Test that the results are saved correctly."""
-        # Create a minimal dataset for testing
         mini_dataset = {
             "gender": [
                 {
@@ -138,21 +142,15 @@ class TestEvaluation(unittest.TestCase):
             ]
         }
 
-        # Initialize evaluator
         evaluator = BiasEvaluator(self.model, self.tokenizer, self.device)
-
-        # Evaluate bias
         evaluator.evaluate_bias(mini_dataset)
 
-        # Save results
         output_path = evaluator.save_results(
             save_path=self.temp_dir, filename="test_results.json"
         )
 
-        # Check that the file exists
         self.assertTrue(os.path.exists(output_path))
 
-        # Check that the file contains valid JSON
         with open(output_path, "r") as f:
             data = json.load(f)
             self.assertIn("gender", data)

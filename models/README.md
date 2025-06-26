@@ -7,7 +7,7 @@ The models are available in the following repositories:
 - [`SmolLM2-360M`](https://huggingface.co/gvnn/nlp-SmolLM2-360M)
 
 > [!IMPORTANT]
-> The models are made available with the same Apache 2.0 license as the original models, while the rest of the code is made available under the MIT license.
+> The models are published with the same Apache 2.0 license as the original ones, while the source code (everything contained in the `src` and `tests` folders) is made available under the MIT license. More details can be found in the [LICENSE](../LICENSE) file.
 
 The stats for the fine-tuning are available in this folder:
 - [Stats for SmolLM-360M](fine_tuning_stats_HuggingFaceTB_SmolLM-360M.json)

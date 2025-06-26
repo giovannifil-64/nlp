@@ -24,7 +24,7 @@ This project aims to identify, measure, and mitigate social biases, such as gend
 
 #### Dataset
 
-- [StereoSet: Measuring stereotypical bias in pretrained language models](https://github.com/moinnadeem/StereoSet). Nadeem, M., Bethke, A., & Reddy, S. (2020). StereoSet: Measuring stereotypical bias in pretrained language models. *arXiv preprint arXiv:2004.09456*.
+- [StereoSet: Measuring stereotypical bias in pretrained language models](https://github.com/moinnadeem/StereoSet). Nadeem, M., Bethke, A., & Reddy, S. (2020). StereoSet: Measuring stereotypical bias in pretrained language models. *arXiv preprint arXiv:2004.09456*
 
 #### References
 
@@ -50,7 +50,6 @@ The tool automatically detects and handles different model architectures:
 
 - **Masked Language Models**: BERT, RoBERTa, DistilBERT, ALBERT, etc.
 - **Causal Language Models**: GPT-2, LLaMA, OPT, BLOOM, etc.
-- **Sequence-to-Sequence Models**: T5, BART, PEGASUS, etc.
 
 ## Project Structure
 
@@ -61,9 +60,9 @@ nlp-project/
 │   └── stereoset_test.json  # Larger dataset used for fine-tuning
 ├── docs/                    # Documentation produced (paper and presentation) [WIP]
 │   └── ...
-├── models/                  # Folder containing the fine-tuned model(s)
+├── models/                  # Contains the fine-tuned model(s) stats and the README.md with the link to the models on Hugging Face
 │   └── ...
-├── results/                 # Folder with the results of the evaluation 
+├── results/                 # Folder with the results obtained during the development of the project
 │   └── ...
 ├── src/                     # Source code
 │   ├── dataset.py           # StereoSet dataset utilities
@@ -172,15 +171,16 @@ The results will be saved in the `results/comparisons` folder.
 
 ## Hardware
 
-Experiments were run on a MacBook Pro:
-- CPU: SoC Apple M4 Pro
+Experiments were run on a MacBook Pro with the following specifications:
+- CPU: SoC Apple M4 Pro (14 cores [^1]) 
 - GPU: Built-in GPU with 20 cores
 - RAM: 48 GB
-- OS: macOS 15.5 (Sequoia)
-- MPS (Metal Performance Shaders) was used for taking advantage of the GPU acceleration. [1] [2]
+- OS: macOS 15.5 (Sequoia) (14.6.1)
+- MPS (Metal Performance Shaders) was used for taking advantage of the GPU acceleration. [^2] [^3]
 
-[1]: https://docs.pytorch.org/docs/stable/notes/mps.html
-[2]: https://developer.apple.com/metal/pytorch/
+[^1]: CPU with 10 performance and 4 efficiency cores
+[^2]: https://docs.pytorch.org/docs/stable/notes/mps.html
+[^3]: https://developer.apple.com/metal/pytorch/
 
 ## License
 

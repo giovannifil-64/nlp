@@ -1,3 +1,23 @@
+# Copyright (c) 2025 Giovanni Filippini
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import os
 import shutil
 import torch
@@ -17,10 +37,8 @@ class TestComprehensiveEvaluation(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up test environment with minimal test data."""
-        # Use temporary directory for test outputs
         cls.temp_dir = tempfile.mkdtemp()
 
-        # Determine device for testing
         if torch.cuda.is_available():
             cls.device = "cuda"
         elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
@@ -28,7 +46,6 @@ class TestComprehensiveEvaluation(unittest.TestCase):
         else:
             cls.device = "cpu"
 
-        # Create minimal test results
         cls.test_results = {
             "gender": {
                 "ss_score": 0.6,
@@ -62,7 +79,6 @@ class TestComprehensiveEvaluation(unittest.TestCase):
             },
         }
 
-        # Create dummy evaluation results for two models
         cls.model_evaluation_results = [
             {"model_name": "distilbert-base-uncased", "results": cls.test_results},
             {
@@ -105,15 +121,12 @@ class TestComprehensiveEvaluation(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """Clean up after tests."""
-        # Remove temp directory
         shutil.rmtree(cls.temp_dir)
 
     def test_calculate_additional_metrics(self):
         """Test that additional metrics are calculated correctly."""
-        # Calculate additional metrics
         results = calculate_additional_metrics(self.test_results.copy())
 
-        # Check that all categories have the new metrics
         for category in results:
             self.assertIn("bias_difference", results[category])
             self.assertIn("bias_ratio", results[category])
@@ -131,18 +144,14 @@ class TestComprehensiveEvaluation(unittest.TestCase):
 
     def test_generate_bias_report(self):
         """Test that bias report is generated correctly."""
-        # Add additional metrics first
         results = calculate_additional_metrics(self.test_results.copy())
 
-        # Generate report
         report_file = generate_bias_report(
             results, "test-model", save_path=self.temp_dir
         )
 
-        # Check that report file exists
         self.assertTrue(os.path.exists(report_file))
 
-        # Check contents of report
         with open(report_file, "r", encoding="utf-8") as f:
             report_content = f.read()
 
@@ -160,40 +169,32 @@ class TestComprehensiveEvaluation(unittest.TestCase):
 
     def test_compare_models(self):
         """Test that model comparison works correctly."""
-        # First add additional metrics to both models' results
         for i in range(len(self.model_evaluation_results)):
             self.model_evaluation_results[i]["results"] = calculate_additional_metrics(
                 self.model_evaluation_results[i]["results"].copy()
             )
 
-        # Generate comparison
         comparison_result = compare_models(
             self.model_evaluation_results, output_dir=self.temp_dir, show_plots=False
         )
 
-        # Check that result is a dictionary with expected keys
         self.assertIsInstance(comparison_result, dict)
         self.assertIn("report_file", comparison_result)
         self.assertIn("visualizations", comparison_result)
         
-        # Check that report file exists
         report_file = comparison_result["report_file"]
         self.assertTrue(os.path.exists(report_file))
 
-        # Check contents of comparison report
         with open(report_file, "r", encoding="utf-8") as f:
             comparison_content = f.read()
 
-            # Check that it contains expected sections
             self.assertIn("# Model Comparison: Bias Evaluation", comparison_content)
             self.assertIn("## Overall Comparison", comparison_content)
             self.assertIn("## Key Findings", comparison_content)
 
-            # Check that it contains both model names
             self.assertIn("distilbert-base-uncased", comparison_content)
             self.assertIn("roberta-base", comparison_content)
             
-        # Check that visualization files exist
         self.assertIsInstance(comparison_result["visualizations"], dict)
         for viz_name, viz_path in comparison_result["visualizations"].items():
             self.assertTrue(os.path.exists(viz_path), f"Visualization file {viz_name} not found at {viz_path}")

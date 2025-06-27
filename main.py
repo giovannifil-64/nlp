@@ -481,18 +481,65 @@ def generate_comparison_visualizations(original_results, fine_tuned_results, mod
     ax.plot(angles, improvements, 'o-', linewidth=2)
     ax.fill(angles, improvements, alpha=0.25)
     
-    plt.xticks(angles[:-1], [cat.capitalize() for cat in categories_without_overall], size=12)
+    ax.set_xticks(angles[:-1])
+    
+    maxval = max(abs(min(improvements)), abs(max(improvements)))
+    chart_radius = maxval * 1.1
+    
+    # Custom positioning for each label
+    for i, (angle, category) in enumerate(zip(angles[:-1], categories_without_overall)):
+        label_text = category.capitalize()
+        
+        if category.lower() == 'profession':
+            label_radius = chart_radius + 0.01
+        elif category.lower() == 'gender':
+            label_radius = chart_radius + 0.032
+        elif category.lower() == 'race':
+            label_radius = chart_radius + 0.03
+        else:
+            label_radius = chart_radius + 0.022
+        
+        ax.text(angle, label_radius, label_text, 
+               horizontalalignment='center', verticalalignment='center', size=12)
+    
+    ax.set_xticklabels([])
     
     for i, improvement in enumerate(improvements[:-1]):
+        angle = angles[i]
+        base_offset = 0.018 if improvement >= 0 else -0.018
+        
+        # Additional offset based on angle to ensure no overlap with category labels
+        if abs(angle - 0) < 0.1:  # Bottom (0 radians) - "Gender"
+            text_offset = base_offset - 0.005  # down
+            va_align = 'top' if improvement >= 0 else 'bottom'
+        elif abs(angle - np.pi/2) < 0.1:  # Right side (π/2 radians) - "Race"
+            text_offset = base_offset - 0.005  # right/down
+            va_align = 'top' if improvement >= 0 else 'bottom'
+        elif abs(angle - np.pi) < 0.1:  # Top (π radians) - "Profession"
+            text_offset = base_offset + 0.005  # further up
+            va_align = 'bottom' if improvement >= 0 else 'top'
+        elif abs(angle - 3*np.pi/2) < 0.1:  # Left side (3π/2 radians) - "Religion"
+            text_offset = base_offset - 0.005  # left/down
+            va_align = 'top' if improvement >= 0 else 'bottom'
+        else:
+            text_offset = base_offset
+            va_align = 'bottom' if improvement >= 0 else 'top'
+        
         ax.annotate(f'{improvement:.3f}',
-                    xy=(angles[i], improvement),
-                    xytext=(angles[i], improvement + 0.02),
+                    xy=(angle, improvement),
+                    xytext=(angle, improvement + text_offset),
                     ha='center',
-                    va='center')
+                    va=va_align,
+                    fontsize=10,
+                    bbox=dict(boxstyle='round,pad=0.4', 
+                             facecolor='white', 
+                             edgecolor='gray', 
+                             alpha=1,
+                             linewidth=0.5),
+        )
     
     plt.title(f'Improvement by Category for {model_name}', size=15, y=1.1)
     
-    maxval = max(abs(min(improvements)), abs(max(improvements)))
     step = np.ceil(maxval * 10) / 10 / 4
     levels = np.arange(-4*step, 4*step + step, step)
     

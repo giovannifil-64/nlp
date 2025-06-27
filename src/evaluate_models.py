@@ -436,7 +436,27 @@ def generate_comparison_plots(model_names, model_results, output_dir, show_plots
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(111, polar=True)
     
-    plt.xticks(angles[:-1], [cat.capitalize() for cat in categories_without_overall], size=12)
+    ax.set_xticks(angles[:-1])
+    
+    chart_radius = 0.7
+    
+    # Custom positioning for each label
+    for i, (angle, category) in enumerate(zip(angles[:-1], categories_without_overall)):
+        label_text = category.capitalize()
+        
+        if category.lower() == 'profession':
+            label_radius = chart_radius + 0.01
+        elif category.lower() == 'gender':
+            label_radius = chart_radius + 0.032
+        elif category.lower() == 'race':
+            label_radius = chart_radius + 0.03
+        else:
+            label_radius = chart_radius + 0.022
+        
+        ax.text(angle, label_radius, label_text, 
+               horizontalalignment='center', verticalalignment='center', size=12)
+    
+    ax.set_xticklabels([])
     
     ax.set_rlabel_position(0)
     plt.yticks([0.3, 0.4, 0.5, 0.6, 0.7], ["0.3", "0.4", "0.5", "0.6", "0.7"], color="grey", size=10)

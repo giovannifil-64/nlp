@@ -7,7 +7,19 @@ _This project is intended for educational purposes only_
 
 > [!IMPORTANT]
 > **AI Disclosure**
-> AI-generated content has been used in this project. More specifically, part of the testing scripts and improvements to the fine-tuning process were done using Claude 3.7 Sonnet. AI has been used to fix some issues in the generation of the the comparison reports (e.g. the bias heatmap).
+> AI-generated content has been used in this project.
+> 
+> **Model Used:** Claude 3.7 Sonnet
+>
+> **Purposes:**
+> - Generating and improving testing scripts in the `tests/` directory.
+> - Enhancing the fine-tuning process implementation.
+> - Debugging and fixing issues in comparison report generation (specifically bias heatmap visualization).
+> - Code optimization and error resolution.
+> 
+> **Extent of Integration:**
+> - All AI-generated code was reviewed and modified as needed, and integrated only after verifying that the changes aligned with the project requirements.
+> - The project's scope, structure, methodology, evaluation logic, and code were developed independently, with AI assistance for improvements and debugging.
 
 ## Project Proposal
 > [!NOTE]

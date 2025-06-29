@@ -70,7 +70,7 @@ nlp-project/
 ├── data/                    # Bias datasets
 │   ├── stereoset_dev.json   # Smaller dataset used for evaluation before and after fine-tuning
 │   └── stereoset_test.json  # Larger dataset used for fine-tuning
-├── docs/                    # Documentation produced (paper and presentation) [WIP]
+├── docs/                    # Documentation produced (paper and presentation)
 │   └── ...
 ├── models/                  # Contains the fine-tuned model(s) stats and the README.md with the link to the models on Hugging Face
 │   └── ...
